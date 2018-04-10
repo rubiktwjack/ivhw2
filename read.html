@@ -1,0 +1,133 @@
+<!DOCTYPE html> 
+<html>
+    <meta charset="utf-8">
+    <style>
+        .axis .domain {
+            display: none;
+        }
+    </style>
+    <title>2018 NCCU Information Visualization HW1</title>
+    <H2>2018 NCCU Information Visualization HW1</H2>
+    <svg width="1270" height="500"></svg>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <body>
+        <script>
+        // write your d3 code here.. 
+        //定義SVG，並放在畫面一個適當的位置
+        var svg = d3.select("svg"),
+        margin = {top: 20, right: 20, bottom: 65, left: 40},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x0 = d3.scaleBand()//scale
+        .rangeRound([0, width])
+        .paddingInner(0.1);
+
+        var x1 = d3.scaleBand()//scale
+            .padding(0.05);
+
+        var y = d3.scaleLinear()//線性scale，高度
+            .rangeRound([height, 0]);
+
+        var z = d3.scaleOrdinal()//線性scale，BAR顏色
+            .range(["#9370db","#fa8072"]);
+        
+        //讀檔
+        d3.csv("test.csv", function(d, i, columns) {
+            for (var i = 1, n = columns.length; i < n; ++i){
+                d[columns[i]] = +d[columns[i]];
+            }
+            return d;
+        }, function(error, data) {//error處理
+        if (error) throw error;
+
+        var keys = data.columns.slice(1);
+
+        x0.domain(data.map(function(d) { return d.State; }));//scale的domain定義
+        x1.domain(keys).rangeRound([0, x0.bandwidth()]);
+        y.domain([0, d3.max(data, function(d) { 
+            return d3.max(keys, function(key) { 
+                return d[key]; 
+                }); 
+            })])
+        .nice();//domain優化
+
+        g.append("g")
+        .selectAll("g")
+        .data(data)
+        .enter()//填入資料
+        .append("g")
+        .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })//移動物件
+        .selectAll("rect")//加上長條圖
+        .data(function(d) { 
+            return keys.map(function(key) { //把key跟value對應起來
+                return {key: key, value: d[key]}; 
+                }); 
+            })
+        .enter()
+        .append("rect")
+        .attr("x", function(d) { return x1(d.key); })
+        .attr("y", function(d) { return y(d.value); })
+        .attr("width", x1.bandwidth())
+        .attr("height", function(d) { return height - y(d.value); })
+        .attr("fill", function(d) { return z(d.key); });
+
+        g.append("g")//x軸
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x0))
+        .selectAll("text")
+        .attr("fill", "#000")
+        .attr("transform", "rotate(25)")
+        .attr("font-weight", "bold")
+        .attr("text-anchor", "start");
+
+        g.append("g")//y軸
+        .attr("class", "axis")
+        .call(d3.axisLeft(y).ticks(null, "s"))
+        .append("text")
+        .attr("x", 2)
+        .attr("y", y(y.ticks().pop()) + 0.5)
+        .attr("dy", "0.32em")
+        .attr("fill", "#000")
+        .attr("font-weight", "bold")
+        .attr("text-anchor", "start")
+        .text("人數");
+
+        var legend = g.append("g")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 10)
+        .attr("text-anchor", "end")
+        .selectAll("g")
+        .data(keys.slice().reverse())
+        .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", width - 19)
+            .attr("width", 19)
+            .attr("height", 19)
+            .attr("fill", z);
+
+        legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9.5)
+            .attr("dy", "0.32em")
+            .text(function(d) { return d; });
+        });
+        </script>
+        <h3>專案說明</h3>
+        <pre>  
+        在本次作業我參考了去年的題目，發現有人做了政大的人數分布，我突然想起大家都說政大女生比例偏高，但究竟都在哪裡呢?
+        於是我找到了相同的OPENDATA，採取了不同的方式做了group bar chart
+        藉由男女人數的直方圖，可以一眼看出哪個科系的女生最多，也可看出哪個科系的男女比例差異最大
+        原始資料除了政大以外的其他學校，還包括了學、碩、博的人數，教師的人數，還有日間、夜間部的人數
+        但因有些科系只有學士，有些科系只有碩、博士，因此統一只取學士的資料
+        這份專案主要使用了D3.js套件製作資訊視覺化
+        將網站建置在www.kissr.com
+        </pre>
+        <h4>參考資料 : <a href="https://data.gov.tw/dataset/6231">政府開放資料</a></h4>
+    </body>
+</html>
