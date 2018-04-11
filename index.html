@@ -1,186 +1,1448 @@
-<html lang="en" data-ember-extension="1"><head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
 
-    <title>2018 NCCU Information Visualization HW</title>
+<style>
+    .bar {
+        fill: steelblue;
+    }
 
-    <!-- Bootstrap core CSS -->
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    .bar:hover {
+        fill: brown;
+    }
 
-    <!-- Custom styles for this template -->
+    .axis {
+        font: 15px sans-serif;
+    }
 
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
 
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-
-  <style>
-    .axis .domain {
+    .x.axis path {
         display: none;
     }
-  </style>
-  <svg width="1270" height="500"></svg>
-  <script src="https://d3js.org/d3.v4.min.js"></script>
+</style>
 
-  <body data-ember-extension="1">
+<title>2018 NCCU Information Visualization HW2</title>
+<H2>2018 NCCU Information Visualization HW2</H2>
+<!--
+    <svg width="1270" height="500"></svg>
+-->
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
-    <div class="container">
+<body>
+    <div>
+        <button type="submit" id="m1" class="remove">Jan</button>
+        <button type="submit" id="m2" class="remove">Feb</button>
+        <button type="submit" id="m3" class="remove">Mar</button>
+        <button type="submit" id="m4" class="remove">Apr</button>
+        <button type="submit" id="m5" class="remove">May</button>
+        <button type="submit" id="m6" class="remove">Jun</button>
+        <button type="submit" id="m7" class="remove">Jul</button>
+        <button type="submit" id="m8" class="remove">Aug</button>
+        <button type="submit" id="m9" class="remove">Sep</button>
+        <button type="submit" id="m10" class="remove">Oct</button>
+        <button type="submit" id="m11" class="remove">Nov</button>
+        <button type="submit" id="m12" class="remove">Dec</button>
+        <br>
+        <br>
+    </div>
+    <script>
+        $('.remove').click(removeSvg);
+        $('#m1').click(barChart1);
+        $('#m2').click(barChart2);
+        $('#m3').click(barChart3);
+        $('#m4').click(barChart4);
+        $('#m5').click(barChart5);
+        $('#m6').click(barChart6);
+        $('#m7').click(barChart7);
+        $('#m8').click(barChart8);
+        $('#m9').click(barChart9);
+        $('#m10').click(barChart12);
+        $('#m11').click(barChart11);
+        $('#m12').click(barChart12);
 
-      <!-- Static navbar -->
-      <div class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">2018 NCCU Information Visualization HW1</a>
-          </div>
-        </div><!--/.container-fluid -->
-      </div>
+        function barChart1() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
 
-      <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
-        <script>
-          // write your d3 code here.. 
-          //定義SVG，並放在畫面一個適當的位置
-          var svg = d3.select("svg"),
-          margin = {top: 20, right: 20, bottom: 65, left: 40},
-          width = +svg.attr("width") - margin.left - margin.right,
-          height = +svg.attr("height") - margin.top - margin.bottom,
-          g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  
-          var x0 = d3.scaleBand()//scale
-          .rangeRound([0, width])
-          .paddingInner(0.1);
-  
-          var x1 = d3.scaleBand()//scale
-              .padding(0.05);
-  
-          var y = d3.scaleLinear()//線性scale，高度
-              .rangeRound([height, 0]);
-  
-          var z = d3.scaleOrdinal()//線性scale，BAR顏色
-              .range(["#9370db","#fa8072"]);
-          
-          //讀檔
-          d3.csv("test.csv", function(d, i, columns) {
-              for (var i = 1, n = columns.length; i < n; ++i){
-                  d[columns[i]] = +d[columns[i]];
-              }
-              return d;
-          }, function(error, data) {//error處理
-          if (error) throw error;
-  
-          var keys = data.columns.slice(1);
-  
-          x0.domain(data.map(function(d) { return d.State; }));//scale的domain定義
-          x1.domain(keys).rangeRound([0, x0.bandwidth()]);
-          y.domain([0, d3.max(data, function(d) { 
-              return d3.max(keys, function(key) { 
-                  return d[key]; 
-                  }); 
-              })])
-          .nice();//domain優化
-  
-          g.append("g")
-          .selectAll("g")
-          .data(data)
-          .enter()//填入資料
-          .append("g")
-          .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })//移動物件
-          .selectAll("rect")//加上長條圖
-          .data(function(d) { 
-              return keys.map(function(key) { //把key跟value對應起來
-                  return {key: key, value: d[key]}; 
-                  }); 
-              })
-          .enter()
-          .append("rect")
-          .attr("x", function(d) { return x1(d.key); })
-          .attr("y", function(d) { return y(d.value); })
-          .attr("width", x1.bandwidth())
-          .attr("height", function(d) { return height - y(d.value); })
-          .attr("fill", function(d) { return z(d.key); });
-  
-          g.append("g")//x軸
-          .attr("class", "axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x0))
-          .selectAll("text")
-          .attr("fill", "#000")
-          .attr("transform", "rotate(25)")
-          .attr("font-weight", "bold")
-          .attr("text-anchor", "start");
-  
-          g.append("g")//y軸
-          .attr("class", "axis")
-          .call(d3.axisLeft(y).ticks(null, "s"))
-          .append("text")
-          .attr("x", 2)
-          .attr("y", y(y.ticks().pop()) + 0.5)
-          .attr("dy", "0.32em")
-          .attr("fill", "#000")
-          .attr("font-weight", "bold")
-          .attr("text-anchor", "start")
-          .text("人數");
-  
-          var legend = g.append("g")
-          .attr("font-family", "sans-serif")
-          .attr("font-size", 10)
-          .attr("text-anchor", "end")
-          .selectAll("g")
-          .data(keys.slice().reverse())
-          .enter().append("g")
-          .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-  
-          legend.append("rect")
-              .attr("x", width - 19)
-              .attr("width", 19)
-              .attr("height", 19)
-              .attr("fill", z);
-  
-          legend.append("text")
-              .attr("x", width - 24)
-              .attr("y", 9.5)
-              .attr("dy", "0.32em")
-              .text(function(d) { return d; });
-          });
-          </script>
-          <h3>專案說明</h3>
-          <pre>  
-          在本次作業我參考了去年的題目，發現有人做了政大的人數分布，我突然想起大家都說政大女生比例偏高，但究竟都在哪裡呢?
-          於是我找到了相同的OPENDATA，採取了不同的方式做了group bar chart
-          藉由男女人數的直方圖，可以一眼看出哪個科系的女生最多，也可看出哪個科系的男女比例差異最大
-          原始資料除了政大以外的其他學校，還包括了學、碩、博的人數，教師的人數，還有日間、夜間部的人數
-          但因有些科系只有學士，有些科系只有碩、博士，因此統一只取學士的資料
-          這份專案主要使用了D3.js套件製作資訊視覺化
-          將網站建置在www.kissr.com
-          </pre>
-          <h4>參考資料 : <a href="https://data.gov.tw/dataset/6231">政府開放資料</a></h4>
-      </div>
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
 
-    </div> <!-- /container -->
+            var y = d3.scale.linear()
+                .range([height, 0]);
 
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
 
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-<script type="text/javascript" src="chrome-extension://bmdblncegkenkacieihfhpjfppoconhi/in-page-script.js"></script></body></html>
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
 
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("jan.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart2() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("feb.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart3() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("mar.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart4() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("apr.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart5() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("may.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart6() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("jun.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart7() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("jul.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart8() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("aug.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart9() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("sep.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart10() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("oct.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart11() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("nov.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+
+        function barChart12() {
+            var margin = { top: 30, right: 20, bottom: 30, left: 40 },
+                width = 1300 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // D3 scales = just math
+            // x is a function that transforms from "domain" (data) into "range" (usual pixels)
+            // domain gets set after the data loads
+            var x = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            // D3 Axis - renders a d3 scale in SVG
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10, "%");
+
+            // create an SVG element (appended to body)
+            // set size
+            // add a "g" element (think "group")
+            // annoying d3 gotcha - the 'svg' variable here is a 'g' element
+            // the final line sets the transform on <g>, not on <svg>
+            var svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("text") // just for the title (ticks are automatic)
+                .attr("transform", "translate(35,-30)") // rotate the text!
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Frequency");
+
+            // d3.tsv is a wrapper around XMLHTTPRequest, returns array of arrays (?) for a TSV file
+            // type function transforms strings to numbers, dates, etc.
+            d3.csv("dec.csv", type, function (error, data) {
+                replay(data);
+            });
+
+            function type(d) {
+                // + coerces to a Number from a String (or anything)
+                d.frequency = +d.frequency;
+                return d;
+            }
+
+            function replay(data) {
+                var slices = [];
+                for (var i = 0; i < data.length; i++) {
+                    slices.push(data.slice(0, i + 1));
+                }
+                slices.forEach(function (slice, index) {
+                    setTimeout(function () {
+                        draw(slice);
+                    }, index * 300);
+                });
+            }
+
+            function draw(data) {
+                console.table(data);
+                // measure the domain (for x, unique letters) (for y [0,maxFrequency])
+                // now the scales are finished and usable
+                x.domain(data.map(function (d) { return d.city; }));
+                y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+
+                // another g element, this time to move the origin to the bottom of the svg element
+                // someSelection.call(thing) is roughly equivalent to thing(someSelection[i])
+                //   for everything in the selection\
+                // the end result is g populated with text and lines!
+                svg.select('.x.axis').transition().duration(300).call(xAxis);
+
+                // same for yAxis but with more transform and a title
+                svg.select(".y.axis").transition().duration(300).call(yAxis)
+
+                // THIS IS THE ACTUAL WORK!
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+
+                bars.exit()
+                    .transition()
+                    .duration(300)
+                    .attr("y", y(0))
+                    .attr("height", height - y(0))
+                    .style('fill-opacity', 1e-6)
+                    .remove();
+
+                // data that needs DOM = enter() (a set/selection, not an event!)
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", y(0))
+                    .attr("height", height - y(0));
+
+                // the "UPDATE" set:
+                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                    .attr("width", x.rangeBand()) // constant, so no callback function(d) here
+                    .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+        }
+        function removeSvg() {
+            $('svg').remove();
+        }
+        barChart1();
+    </script>
+
+    <!--
+    <h3>專案說明</h3>
+    <pre>  
+        在本次作業我參考了去年的題目，發現有人做了政大的人數分布，我突然想起大家都說政大女生比例偏高，但究竟都在哪裡呢?
+        於是我找到了相同的OPENDATA，採取了不同的方式做了group bar chart
+        藉由男女人數的直方圖，可以一眼看出哪個科系的女生最多，也可看出哪個科系的男女比例差異最大
+        原始資料除了政大以外的其他學校，還包括了學、碩、博的人數，教師的人數，還有日間、夜間部的人數
+        但因有些科系只有學士，有些科系只有碩、博士，因此統一只取學士的資料
+        這份專案主要使用了D3.js套件製作資訊視覺化
+        將網站建置在www.kissr.com
+        </pre>
+    <h4>參考資料 :
+        <a href="https://data.gov.tw/dataset/6231">政府開放資料</a>
+    </h4>
+    -->
+</body>
+
+</html>
