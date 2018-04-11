@@ -37,20 +37,27 @@
 
 <body>
     <div>
-        <button type="submit" id="m1" class="remove">Jan</button>
-        <button type="submit" id="m2" class="remove">Feb</button>
-        <button type="submit" id="m3" class="remove">Mar</button>
-        <button type="submit" id="m4" class="remove">Apr</button>
-        <button type="submit" id="m5" class="remove">May</button>
-        <button type="submit" id="m6" class="remove">Jun</button>
-        <button type="submit" id="m7" class="remove">Jul</button>
-        <button type="submit" id="m8" class="remove">Aug</button>
-        <button type="submit" id="m9" class="remove">Sep</button>
-        <button type="submit" id="m10" class="remove">Oct</button>
-        <button type="submit" id="m11" class="remove">Nov</button>
-        <button type="submit" id="m12" class="remove">Dec</button>
+        <button type="submit" id="m1" class="remove" style="width:80px;height:40px;">Jan</button>
+        <button type="submit" id="m2" class="remove" style="width:80px;height:40px;">Feb</button>
+        <button type="submit" id="m3" class="remove" style="width:80px;height:40px;">Mar</button>
+        <button type="submit" id="m4" class="remove" style="width:80px;height:40px;">Apr</button>
+        <button type="submit" id="m5" class="remove" style="width:80px;height:40px;">May</button>
+        <button type="submit" id="m6" class="remove" style="width:80px;height:40px;">Jun</button>
+        <button type="submit" id="m7" class="remove" style="width:80px;height:40px;">Jul</button>
+        <button type="submit" id="m8" class="remove" style="width:80px;height:40px;">Aug</button>
+        <button type="submit" id="m9" class="remove" style="width:80px;height:40px;">Sep</button>
+        <button type="submit" id="m10" class="remove" style="width:80px;height:40px;">Oct</button>
+        <button type="submit" id="m11" class="remove" style="width:80px;height:40px;">Nov</button>
+        <button type="submit" id="m12" class="remove" style="width:80px;height:40px;">Dec</button>
         <br>
-        <br>
+        <h3>專案說明</h3>
+        <pre>  
+        這份專案主要使用了D3.js套件製作資訊視覺化
+        將網站建置在github靜態網頁上
+        </pre>
+        <h4>參考資料 :
+            <a href="https://data.gov.tw/dataset/29935">政府開放資料</a>
+        </h4>
     </div>
     <script>
         $('.remove').click(removeSvg);
@@ -1428,21 +1435,6 @@
         barChart1();
     </script>
 
-    <!--
-    <h3>專案說明</h3>
-    <pre>  
-        在本次作業我參考了去年的題目，發現有人做了政大的人數分布，我突然想起大家都說政大女生比例偏高，但究竟都在哪裡呢?
-        於是我找到了相同的OPENDATA，採取了不同的方式做了group bar chart
-        藉由男女人數的直方圖，可以一眼看出哪個科系的女生最多，也可看出哪個科系的男女比例差異最大
-        原始資料除了政大以外的其他學校，還包括了學、碩、博的人數，教師的人數，還有日間、夜間部的人數
-        但因有些科系只有學士，有些科系只有碩、博士，因此統一只取學士的資料
-        這份專案主要使用了D3.js套件製作資訊視覺化
-        將網站建置在www.kissr.com
-        </pre>
-    <h4>參考資料 :
-        <a href="https://data.gov.tw/dataset/6231">政府開放資料</a>
-    </h4>
-    -->
 </body>
 
 </html>
