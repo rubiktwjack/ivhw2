@@ -11,8 +11,13 @@
         fill: brown;
     }
 
+    .highlight {
+        fill: brown;
+    }
+
     .axis {
         font: 15px sans-serif;
+        font-weight: bold;
     }
 
     .axis path,
@@ -37,6 +42,7 @@
 
 <body>
     <div>
+        <h3>全臺用電比例長條圖</h3>
         <button type="submit" id="m1" class="remove" style="width:80px;height:40px;">Jan</button>
         <button type="submit" id="m2" class="remove" style="width:80px;height:40px;">Feb</button>
         <button type="submit" id="m3" class="remove" style="width:80px;height:40px;">Mar</button>
@@ -50,14 +56,6 @@
         <button type="submit" id="m11" class="remove" style="width:80px;height:40px;">Nov</button>
         <button type="submit" id="m12" class="remove" style="width:80px;height:40px;">Dec</button>
         <br>
-        <h3>專案說明</h3>
-        <pre>  
-        這份專案主要使用了D3.js套件製作資訊視覺化
-        將網站建置在github靜態網頁
-        </pre>
-        <h4>參考資料 :
-            <a href="https://data.gov.tw/dataset/29935">政府開放資料</a>
-        </h4>
     </div>
     <script>
         $('.remove').click(removeSvg);
@@ -76,7 +74,7 @@
 
         function barChart1() {
             var margin = { top: 30, right: 20, bottom: 30, left: 40 },
-                width = 1300 - margin.left - margin.right,
+                width = 1280 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
 
             // D3 scales = just math
@@ -163,7 +161,8 @@
                 svg.select(".y.axis").transition().duration(300).call(yAxis)
 
                 // THIS IS THE ACTUAL WORK!
-                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; }) // (data) is an array/iterable thing, second argument is an ID generator function
+                var bars = svg.selectAll(".bar").data(data, function (d) { return d.city; })
+                // (data) is an array/iterable thing, second argument is an ID generator function
 
                 bars.exit()
                     .transition()
@@ -180,10 +179,52 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars
+                    .on("mouseover", onMouseOver) //Add listener for the mouseover event
+                    .on("mouseout", onMouseOut)   //Add listener for the mouseout event
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); })
+                    // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
-                    .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+                    .attr("height", function (d) { return height - y(d.frequency); });
+                // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -293,10 +334,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver) //Add listener for the mouseover event
+                    .on("mouseout", onMouseOut)   //Add listener for the mouseout event
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -406,10 +486,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver) //Add listener for the mouseover event
+                    .on("mouseout", onMouseOut)   //Add listener for the mouseout event
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -519,10 +638,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -632,10 +790,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -745,10 +942,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -858,10 +1094,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -971,10 +1246,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -1084,10 +1398,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -1197,10 +1550,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -1310,10 +1702,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
 
@@ -1423,10 +1854,49 @@
                     .attr("height", height - y(0));
 
                 // the "UPDATE" set:
-                bars.transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
+                bars.on("mouseover", onMouseOver)
+                    .on("mouseout", onMouseOut)
+                    .transition().duration(300).attr("x", function (d) { return x(d.city); }) // (d) is one item from the data array, x is the scale object from above
                     .attr("width", x.rangeBand()) // constant, so no callback function(d) here
                     .attr("y", function (d) { /*console.log(d);*/ return y(d.frequency); })
                     .attr("height", function (d) { return height - y(d.frequency); }); // flip the height, because y's domain is bottom up, but SVG renders top down
+            }
+            //mouseover event handler function
+            function onMouseOver(d, i) {
+                d3.select(this).attr('class', 'highlight');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand() + 5)
+                    .attr("y", function (d) { return y(d.frequency) - 10; })
+                    .attr("height", function (d) { return height - y(d.frequency) + 10; });
+
+                svg.append("text")
+                    .attr('class', 'val')
+                    .attr('x', function () {
+                        return x(d.city);
+                    })
+                    .attr('y', function () {
+                        return y(d.frequency) - 15;
+                    })
+                    .text(function () {
+                        return [d.frequency * 100 + '%'];  // Value of the text
+                    });
+            }
+
+            //mouseout event handler function
+            function onMouseOut(d, i) {
+                // use the text label class to remove label on mouseout
+                d3.select(this).attr('class', 'bar');
+                d3.select(this)
+                    .transition()     // adds animation
+                    .duration(400)
+                    .attr('width', x.rangeBand())
+                    .attr("y", function (d) { return y(d.frequency); })
+                    .attr("height", function (d) { return height - y(d.frequency); });
+
+                d3.selectAll('.val')
+                    .remove()
             }
         }
         function removeSvg() {
