@@ -1,5 +1,0 @@
-本份檔案有3個文件，分別為index.html、read.html和test.csv
-test.csv為opendata資料經過整理刪除不需要的資料之後，所得的input檔
-read.html為原始使用的html可直接開啟顯示成果
-index.html為將網站建置在kissr.com上時，套用他的模板，將read.html中的D3.js部分放進去而成的
-但因為直接開啟時無法載入bootstrap所以不推薦使用，只是怕老師覺得網站與read.html不符合而一併附上
